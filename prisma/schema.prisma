@@ -1,0 +1,64 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model Genres {
+  id           Int            @id @default(autoincrement()) @db.UnsignedInt
+  name         String         @db.VarChar(50)
+  ProductGenre ProductGenre[]
+}
+
+model ProductGenre {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  product_id Int      @db.UnsignedInt
+  genre_id   Int      @db.UnsignedInt
+  Genres     Genres   @relation(fields: [genre_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ProductGenre_ibfk_2")
+  Products   Products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "ProductGenre_ibfk_1")
+
+  @@index([genre_id], map: "genre_id")
+  @@index([product_id], map: "product_id")
+}
+
+model Products {
+  id           Int            @id @default(autoincrement()) @db.UnsignedInt
+  img_path     String?        @default("default.png") @db.VarChar(50)
+  name         String         @db.VarChar(255)
+  author       String         @db.VarChar(50)
+  isbn         String         @db.VarChar(13)
+  house        String         @db.VarChar(50)
+  price        Int            @db.UnsignedInt
+  sales        Int?           @default(0) @db.UnsignedInt
+  rating       Int?           @default(0)
+  description  String?        @db.Text
+  ProductGenre ProductGenre[]
+  UserProduct  UserProduct[]
+}
+
+model UserProduct {
+  id         Int      @id @default(autoincrement()) @db.UnsignedInt
+  user_id    Int      @db.UnsignedInt
+  product_id Int      @db.UnsignedInt
+  quantity   Int?     @default(1)
+  rating     Int?     @db.UnsignedTinyInt
+  Products   Products @relation(fields: [product_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "UserProduct_ibfk_2")
+  Users      Users    @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "UserProduct_ibfk_1")
+
+  @@index([product_id], map: "product_id")
+  @@index([user_id], map: "user_id")
+}
+
+model Users {
+  id          Int           @id @default(autoincrement()) @db.UnsignedInt
+  img_path    String?       @default("default.png") @db.VarChar(50)
+  first_name  String        @db.VarChar(50)
+  last_name   String        @db.VarChar(50)
+  category    String        @db.VarChar(10)
+  email       String        @unique(map: "email") @db.VarChar(50)
+  password    String        @db.Char(60)
+  UserProduct UserProduct[]
+}
