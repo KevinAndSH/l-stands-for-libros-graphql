@@ -110,11 +110,7 @@ const UserType = new GraphQLObjectType({
     email: {
       type: GraphQLNonNull(GraphQLString),
       description: "User's e-mail address"
-    },
-    password: {
-      type: GraphQLNonNull(GraphQLString),
-      description: "A unique key required to authenticate a user"
-    },
+    }
   })
 })
 

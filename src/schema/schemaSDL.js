@@ -31,8 +31,6 @@ module.exports = buildSchema(`#graphql
     category: String!
     "User's e-mail address"
     email: String!
-    "A unique key required to authenticate a user"
-    password: String!
   }
 
   "A product available in our website"

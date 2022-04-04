@@ -7,3 +7,5 @@ API from retrieving user and products data.
 (Update: I found out later on that you can use the function `makeExecutableSchema` from [`graphql-tools`](https://www.graphql-tools.com) to add resolvers to the schema in a simple way while using the SDL syntax. I'll keep that in mind for future projects 👍)
 
 Prisma was used as our ORM due to its simplicity to use compared to other JavaScript ORMs, thanks to its type support and autocompletion (even without TypeScript), and getting the models in our project is as easy as typing a few lines in the terminal.
+
+You can check it out [here](https://lstandsforlibros-api.herokuapp.com/graphql)!

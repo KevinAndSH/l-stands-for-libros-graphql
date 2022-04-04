@@ -58,11 +58,11 @@ const RootQueryType = new GraphQLObjectType({
       args: {
         page: {
           type: GraphQLInt,
-          description: "For pagination purposes"
+          description: "For pagination purposes (default is 1)"
         },
         amount: {
           type: GraphQLInt,
-          description: "Amount of entries per page"
+          description: "Amount of entries per page (10 by default)"
         }
       },
       resolve: (_, { page, amount }) => {
