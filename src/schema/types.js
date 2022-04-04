@@ -1,9 +1,11 @@
 const {
   GraphQLObjectType,
   GraphQLNonNull,
+  GraphQLID,
   GraphQLInt,
   GraphQLString,
-  GraphQLList
+  GraphQLList,
+  GraphQLEnumType
 } = require("graphql")
 const prisma = require('../prisma-client')
 
@@ -12,7 +14,7 @@ const ProductType = new GraphQLObjectType({
   description: "A product available in our website",
   fields: () => ({
     id: {
-      type: GraphQLNonNull(GraphQLInt),
+      type: GraphQLNonNull(GraphQLID),
       description: "A unique product identifier"
     },
     img_path: {
@@ -44,15 +46,36 @@ const ProductType = new GraphQLObjectType({
       description: "A short description of the product's content"
     },
     genres: {
-      type: new GraphQLList(GenreType),
+      type: GraphQLList(GenreType),
       description: "A list of genres",
-      // resolve: product => {
-      //   prisma.productGenre.findMany({
-      //     select:
-      //   })
-      // }
+      resolve: async product => {
+        try {
+          const queryResult = await prisma.productGenre.findMany({
+            where: { product_id: product.id },
+            select: { Genres: true }
+          })
+          return queryResult.map(item => item.Genres)
+        } catch (error) {
+          throw error          
+        }
+      }
     }
   })
+})
+
+const CategoryType = new GraphQLEnumType({
+  name: "Category",
+  description: "Either buyer or vendor",
+  values: {
+    BUYER: {
+      value: "buyer",
+      description: "User able to purchase products"
+    },
+    VENDOR: {
+      value: "vendor",
+      description: "User able to purchase and sell products"
+    }
+  }
 })
 
 const UserType = new GraphQLObjectType({
@@ -60,7 +83,7 @@ const UserType = new GraphQLObjectType({
   description: "A user able to buy and/or sell products",
   fields: () => ({
     id: {
-      type: GraphQLNonNull(GraphQLInt),
+      type: GraphQLNonNull(GraphQLID),
       description: "A unique user identifier"
     },
     img_path: {
@@ -75,8 +98,13 @@ const UserType = new GraphQLObjectType({
       type: GraphQLNonNull(GraphQLString),
       description: "A user's last name"
     },
-    category: {
+    full_name: {
       type: GraphQLNonNull(GraphQLString),
+      description: "A user's full name",
+      resolve: ({ first_name, last_name }) => first_name + " " + last_name
+    },
+    category: {
+      type: GraphQLNonNull(CategoryType),
       description: "A user can be either buyer or vendor"
     },
     email: {
@@ -95,7 +123,7 @@ const GenreType = new GraphQLObjectType({
   description: "Category that distinguish literature based on some stylistic criteria",
   fields: () => ({
     id: {
-      type: GraphQLNonNull(GraphQLInt),
+      type: GraphQLNonNull(GraphQLID),
       description: "A unique genre identifier"
     },
     name: {
@@ -103,8 +131,19 @@ const GenreType = new GraphQLObjectType({
       description: "Genre"
     },
     products: {
-      type: ProductType,
-      description: "All products with this genre"
+      type: GraphQLList(ProductType),
+      description: "All products with this genre",
+      resolve: async genre => {
+        try {
+          const queryResult = await prisma.productGenre.findMany({
+            where: { genre_id: genre.id },
+            select: { Products: true }
+          })
+          return queryResult.map(item => item.Products)
+        } catch (error) {
+          throw error          
+        }
+      }
     }
   })
 })

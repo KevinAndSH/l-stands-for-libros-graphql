@@ -8,11 +8,11 @@ module.exports = buildSchema(`#graphql
     "Get a random number between the 2 specified values (0 and 99 by default)"
     random(min: Int, max: Int): Int
     "Get a product by ID"
-    product: Product
+    product(id: ID!): Product
     "Get all products"
     products: [Product]
     "Get user info by ID"
-    user: User
+    user(id: ID!): User
     "Get all users"
     users: [User]
   }
@@ -20,7 +20,7 @@ module.exports = buildSchema(`#graphql
   "A user able to buy and/or sell products"
   type User {
     "A unique user identifier"
-    id: Int!
+    id: ID!
     "The name of the file containing the profile picture"
     img_path: String!
     "A user's first name"
@@ -38,7 +38,7 @@ module.exports = buildSchema(`#graphql
   "A product available in our website"
   type Product {
     "A unique product identifier"
-    id: Int!
+    id: ID!
     "The name of the file containing the image of the product"
     img_path: String!
     "The product's name"
@@ -60,7 +60,7 @@ module.exports = buildSchema(`#graphql
   "Category that distinguish literature based on some stylistic criteria"
   type Genre {
     "A unique genre identifier"
-    id: Int!
+    id: ID!
     "Genre"
     name: String!
     "All products with this genre"

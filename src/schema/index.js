@@ -1,13 +1,15 @@
 const prisma = require('../prisma-client')
 const {
   GraphQLObjectType,
+  GraphQLNonNull,
+  GraphQLID,
   GraphQLInt,
   GraphQLString,
   GraphQLList,
   GraphQLSchema
 } = require("graphql")
 
-const { ProductType, UserType } = require('./types')
+const { ProductType, UserType, GenreType } = require('./types')
 
 const RootQueryType = new GraphQLObjectType({
   name: "Query",
@@ -43,17 +45,37 @@ const RootQueryType = new GraphQLObjectType({
       description: "Get a product by ID",
       args: {
         id: {
-          type: GraphQLInt,
+          type: GraphQLNonNull(GraphQLID),
           description: "Product ID"
         }
       },
-      resolve: async (_, { id }) => prisma.products.findFirst({ where: { id } })
+      resolve: (_, { id }) => prisma.products.findUnique({ where: { id: parseInt(id) } }).catch(err => {throw err})
     },
 
     products: {
-      type: new GraphQLList(ProductType),
+      type: GraphQLList(ProductType),
       description: "Get all products",
-      resolve: async () => prisma.products.findMany()
+      args: {
+        page: {
+          type: GraphQLInt,
+          description: "For pagination purposes"
+        },
+        amount: {
+          type: GraphQLInt,
+          description: "Amount of entries per page"
+        }
+      },
+      resolve: (_, { page, amount }) => {
+        const [pageValue, amountValue] = [page ?? 1, amount ?? 10]
+        try {
+          return prisma.products.findMany({
+            take: amountValue,
+            skip: amountValue * (pageValue - 1)
+          })
+        } catch (error) {
+          throw error
+        }
+      }
     },
 
     user: {
@@ -61,17 +83,63 @@ const RootQueryType = new GraphQLObjectType({
       description: "Get user info by ID",
       args: {
         id: {
-          type: GraphQLInt,
+          type: GraphQLNonNull(GraphQLID),
           description: "User ID"
         }
       },
-      resolve: async (_, { id }) => prisma.users.findUnique({ where: { id } })
+      resolve: (_, { id }) => prisma.users.findUnique({ where: { id: parseInt(id) } }).catch(err => {throw err})
     },
 
     users: {
-      type: new GraphQLList(UserType),
+      type: GraphQLList(UserType),
       description: "Get all users",
-      resolve: async () => prisma.users.findMany()
+      args: {
+        page: {
+          type: GraphQLInt,
+          description: "For pagination purposes"
+        },
+        amount: {
+          type: GraphQLInt,
+          description: "Amount of entries per page"
+        }
+      },
+      resolve: (_, { page, amount }) => {
+        const [pageValue, amountValue] = [page ?? 1, amount ?? 10]
+        try {
+          return prisma.users.findMany({
+            take: amountValue,
+            skip: amountValue * (pageValue - 1)
+          })
+        } catch (error) {
+          throw error
+        }
+      }
+    },
+
+    genres: {
+      type: GraphQLList(GenreType),
+      description: "Category that distinguish literature based on some stylistic criteria",
+      args: {
+        page: {
+          type: GraphQLInt,
+          description: "For pagination purposes"
+        },
+        amount: {
+          type: GraphQLInt,
+          description: "Amount of entries per page"
+        }
+      },
+      resolve: (_, { page, amount }) => {
+        const [pageValue, amountValue] = [page ?? 1, amount ?? 10]
+        try {
+          return prisma.genres.findMany({
+            take: amountValue,
+            skip: amountValue * (pageValue - 1)
+          })
+        } catch (error) {
+          throw error
+        }
+      }
     }
   })
 })
